@@ -1,9 +1,10 @@
 const items = Symbol("items");
 const iteratorRef = Symbol("ref");
 
-export default class Bag {
+// export default class Bag {
+class Bag {
     constructor(iterable) {
-        this[items] = [...iterable];
+        if(iterator) this[items] = [...iterable];
     }
 
     static get [Symbol.species]() { return Set; }
