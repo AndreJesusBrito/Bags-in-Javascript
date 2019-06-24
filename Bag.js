@@ -1,71 +1,71 @@
-const items = Symbol("items");
+const items = new WeakMap();
 const iteratorRef = Symbol("ref");
 
 // export default class Bag {
 class Bag {
     constructor(iterable) {
-        if(iterator) this[items] = [...iterable];
+        if(iterable) item[this] = [...iterable];
     }
 
-    static get [Symbol.species]() { return Set; }
+    static get [Symbol.species]() { return Bag; } // WHAT!?
 
     add(value) {
-        this[items].push(value);
+        item[this].push(value);
         return true;
     }
 
     delete(value) {
-        const index = this[items].indexOf(value);
+        const index = item[this].indexOf(value);
         if(index === -1) return false;
 
-        this[items].splice(index, 1);
+        item[this].splice(index, 1);
         return true;
     }
 
     forEach(callback, thisArg) {
-        this[items].forEach(v => {
+        item[this].forEach(v => {
             callback.call(thisArg, v, v, this);
         });
     }
 
     clear() {
-        this[items] = [];
+        item[this] = [];
     }
 
     has(value) {
-        return this[items].indexOf(value) !== -1;
+        return item[this].indexOf(value) !== -1;
     }
 
     values() {
-        return this[Symbol.iterator]();
-    }
-
-    size() {
-        return this[items].length;
-    }
-
-    [Symbol.iterator]() {
         const iter = new BagIterator();
         iter[iteratorRef] = this;
         return iter;
     }
 
-    toString() {
-        return "[object Bag]"
+    size() {
+        return item[this].length;
     }
 }
 
+Bag.prototype[Symbol.iterator] = Bag.prototype.values;
+Bag.prototype[Symbol.toStringTag] = "Bag";
 
 class BagIterator {
     constructor() {
         this.count = 0;
+        this._infoObj = {done: false};
     }
 
     next() {
-        if(this.count < this[iteratorRef].size()) {
-            return { done: false, value: this[iteratorRef][items][this.count++] };
+        const bag = this[iteratorRef];
+        if(this.count < bag.size()) {
+            this._infoObj.value = bag[items][this.count++];
         } else {
-            return { done: true };
+            this._infoObj.done = true;
+            this._infoObj.value = undefined;
         }
+        return this._infoObj;
     }
 }
+
+BagIterator.prototype[Symbol.toStringTag] = "Bag Iterator";
